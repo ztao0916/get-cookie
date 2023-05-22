@@ -1,6 +1,12 @@
 /*
  * @Author: ztao
  * @Date: 2023-05-15 17:56:01
+ * @LastEditTime: 2023-05-22 15:37:45
+ * @Description:
+ */
+/*
+ * @Author: ztao
+ * @Date: 2023-05-15 17:56:01
  * @LastEditTime: 2023-05-22 12:23:25
  * @Description:
  */
@@ -8,6 +14,7 @@ const { chromium } = require("playwright");
 const axios = require("axios");
 const { addExtra } = require("playwright-extra");
 const stealth = require("puppeteer-extra-plugin-stealth");
+const { USERNAME, PASSWORD } = require("./config");
 // 启用 Stealth 模式
 const playwright = addExtra(chromium);
 playwright.use(stealth());
@@ -38,8 +45,8 @@ async function loginAndReturnCookie() {
   // 等待登录表单元素加载完成
   await frame.waitForSelector("#login-form");
   // 输入用户名和密码
-  await frame.type('input[name="fm-login-id"]', "aezy@epean.com.cn");
-  await frame.type('input[name="fm-login-password"]', "Epean123@");
+  await frame.type('input[name="fm-login-id"]', USERNAME);
+  await frame.type('input[name="fm-login-password"]', PASSWORD);
 
   // 等待登录成功的条件，可以根据实际情况修改
   await page.waitForNavigation({ waitUntil: "networkidle" });
