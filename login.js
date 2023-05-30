@@ -1,7 +1,7 @@
 /*
  * @Author: ztao
  * @Date: 2023-05-15 17:56:01
- * @LastEditTime: 2023-05-22 15:37:45
+ * @LastEditTime: 2023-05-29 19:22:29
  * @Description:
  */
 /*
@@ -10,7 +10,7 @@
  * @LastEditTime: 2023-05-22 12:23:25
  * @Description:
  */
-const { chromium } = require("playwright");
+const { chromium, webkit, firefox } = require("playwright");
 const axios = require("axios");
 const { addExtra } = require("playwright-extra");
 const stealth = require("puppeteer-extra-plugin-stealth");
@@ -28,7 +28,10 @@ const sleep = (time) => {
 };
 
 async function loginAndReturnCookie() {
-  const browser = await playwright.launch({ headless: false });
+  const browser = await playwright.launch({
+    headless: true,
+    channel: "msedge",
+  });
   const context = await browser.newContext();
   const page = await context.newPage();
   // 跳转到登录页面
@@ -45,16 +48,13 @@ async function loginAndReturnCookie() {
   // 等待登录表单元素加载完成
   await frame.waitForSelector("#login-form");
   // 输入用户名和密码
-  await frame.type('input[name="fm-login-id"]', USERNAME);
-  await frame.type('input[name="fm-login-password"]', PASSWORD);
+  await frame.type("#fm-login-id", USERNAME);
+  await frame.type("#fm-login-password", PASSWORD);
+  // 点击登录按钮
+  await frame.click(".fm-submit");
 
   // 等待登录成功的条件，可以根据实际情况修改
-  await page.waitForNavigation({ waitUntil: "networkidle" });
-  await page.goto(
-    "https://web.scm.tmall.com/?frameUrl=https%3A%2F%2Fweb.scm.tmall.com%2Fpages%2Ffbae%2Fvendor_b2_auto_login_product_trace#271173.576209.716021",
-    { waitUntil: "networkidle" }
-  );
-  await sleep(1000);
+  await sleep(3000);
   const cookiesArr = await context.cookies();
 
   //格式化 cooKie
@@ -93,8 +93,8 @@ async function loginAndReturnCookie() {
       },
     });
     let targetUrl = res.data.data;
-    await page.goto(targetUrl, { waitUntil: "networkidle" });
-    await sleep(1000);
+    await page.goto(targetUrl, { waitUntil: "domcontentloaded" });
+    await sleep(2000);
     //获取targetUrl的cookie
     const targetCookiesArr = await context.cookies();
     const targetCookies = formatCookie(targetCookiesArr);
@@ -105,6 +105,4 @@ async function loginAndReturnCookie() {
   }
 }
 
-loginAndReturnCookie().then((res) => {
-  console.log(res);
-});
+module.exports = loginAndReturnCookie;

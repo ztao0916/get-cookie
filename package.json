@@ -19,6 +19,7 @@
   "homepage": "https://github.com/ztao0916/get-cookie#readme",
   "dependencies": {
     "axios": "^1.4.0",
+    "express": "^4.18.2",
     "playwright": "^1.33.0",
     "playwright-extra": "^4.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2"
