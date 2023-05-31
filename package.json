@@ -4,22 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ztao0916/get-cookie.git"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "pm2 start ecosystem.config.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/ztao0916/get-cookie/issues"
-  },
-  "homepage": "https://github.com/ztao0916/get-cookie#readme",
   "dependencies": {
+    "@vercel/node": "^2.14.3",
     "axios": "^1.4.0",
     "express": "^4.18.2",
+    "log4js": "^6.9.1",
     "playwright": "^1.33.0",
     "playwright-extra": "^4.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2"

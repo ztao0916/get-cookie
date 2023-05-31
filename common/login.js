@@ -1,7 +1,7 @@
 /*
  * @Author: ztao
  * @Date: 2023-05-15 17:56:01
- * @LastEditTime: 2023-05-29 19:22:29
+ * @LastEditTime: 2023-05-31 12:19:50
  * @Description:
  */
 /*
@@ -10,11 +10,11 @@
  * @LastEditTime: 2023-05-22 12:23:25
  * @Description:
  */
-const { chromium, webkit, firefox } = require("playwright");
+const { chromium } = require("playwright");
 const axios = require("axios");
 const { addExtra } = require("playwright-extra");
 const stealth = require("puppeteer-extra-plugin-stealth");
-const { USERNAME, PASSWORD } = require("./config");
+const { USERNAME, PASSWORD } = require("../config/user");
 // 启用 Stealth 模式
 const playwright = addExtra(chromium);
 playwright.use(stealth());
