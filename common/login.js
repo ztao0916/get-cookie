@@ -1,23 +1,15 @@
 /*
  * @Author: ztao
  * @Date: 2023-05-15 17:56:01
- * @LastEditTime: 2023-05-31 12:19:50
- * @Description:
+ * @LastEditTime: 2023-06-01 21:24:41
+ * @Description: 卖家精灵cookie获取
  */
-/*
- * @Author: ztao
- * @Date: 2023-05-15 17:56:01
- * @LastEditTime: 2023-05-22 12:23:25
- * @Description:
- */
-const { chromium } = require("playwright");
-const axios = require("axios");
-const { addExtra } = require("playwright-extra");
-const stealth = require("puppeteer-extra-plugin-stealth");
+const vanillaPuppeteer = require("puppeteer");
+const { addExtra } = require("puppeteer-extra");
+const StealthPlugin = require("puppeteer-extra-plugin-stealth");
 const { USERNAME, PASSWORD } = require("../config/user");
-// 启用 Stealth 模式
-const playwright = addExtra(chromium);
-playwright.use(stealth());
+const puppeteer = addExtra(vanillaPuppeteer);
+puppeteer.use(StealthPlugin()); //躲避反扒追踪
 
 const sleep = (time) => {
   return new Promise((resolve) => {
@@ -28,34 +20,55 @@ const sleep = (time) => {
 };
 
 async function loginAndReturnCookie() {
-  const browser = await playwright.launch({
+  const browser = await puppeteer.launch({
+    ignoreHTTPSErrors: false,
     headless: true,
-    channel: "msedge",
+    ignoreDefaultArgs: ["--enable-automation"],
+    args: [
+      "--disable-gpu",
+      "--disable-dev-shm-usage",
+      "--disable-setuid-sandbox",
+      "--no-first-run",
+      "--no-sandbox",
+      "--disable-infobars",
+      "--no-zygote",
+      "--ignore-certificate-errors",
+      "--disable-web-security",
+    ],
+    defaultViewport: {
+      width: 1600,
+      height: 900,
+    },
   });
-  const context = await browser.newContext();
-  const page = await context.newPage();
+
+  const page = await browser.newPage();
+
   // 跳转到登录页面
-  await page.goto("https://web.scm.tmall.com/login");
+  await page.goto("https://www.sellersprite.com/cn/w/user/login");
+  //点击切换到账号密码登录
+  const pwdLoginSelector = "#pills-login>li:nth-child(2)>a";
+  //账号输入框
+  const usernameSelector =
+    ".login-content>.login-new-box>#form_signin_password>.input-group.u-form.mt-5.pt-2>input[name=email]";
+  //密码输入框
+  const passwordSelector =
+    ".login-content>.login-new-box>#form_signin_password>.input-group.u-form.mt-3>input[type=password]";
+  await page.click(pwdLoginSelector);
+  //登录按钮
+  const loginBtnSelector = ".login-content>.login-new-box>button.login-btn";
 
-  // 等待 iframe 元素加载完成
-  await page.waitForSelector("iframe");
-
-  // 获取 iframe 元素的句柄
-  const frameHandle = await page.$("#alibaba-login-box");
-  // 进入 iframe 上下文
-  const frame = await frameHandle.contentFrame();
-
-  // 等待登录表单元素加载完成
-  await frame.waitForSelector("#login-form");
+  await page.click(pwdLoginSelector);
+  await page.waitForSelector(".login-content>.login-new-box", {
+    visible: true,
+  });
   // 输入用户名和密码
-  await frame.type("#fm-login-id", USERNAME);
-  await frame.type("#fm-login-password", PASSWORD);
-  // 点击登录按钮
-  await frame.click(".fm-submit");
-
+  await page.type(usernameSelector, USERNAME);
+  await page.type(passwordSelector, PASSWORD);
+  // 回车登录
+  await page.click(loginBtnSelector);
   // 等待登录成功的条件，可以根据实际情况修改
-  await sleep(3000);
-  const cookiesArr = await context.cookies();
+  await sleep(1500);
+  const cookiesArr = await page.cookies();
 
   //格式化 cooKie
   const formatCookie = (cookies) => {
@@ -76,33 +89,8 @@ async function loginAndReturnCookie() {
   };
 
   const cookies = formatCookie(cookiesArr);
-  //根据cookie发送请求并返回链接
-  const url = "https://web.scm.tmall.com/";
-  const params = {
-    frameUrl:
-      "https://web.scm.tmall.com/pages/fbae/vendor_b2_auto_login_product_trace ",
-  };
-  try {
-    let res = await axios({
-      method: "get",
-      url: `https://seller.scm.tmall.com/b2-login-gsp/getProductTraceUrl?requestUrl=https%3A%2F%2Fsuppliers.aliexpress.com%2F%23%2Fproduct%2Fsourcing%2Flist`,
-      headers: {
-        cookie: cookies,
-        userAgent:
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
-      },
-    });
-    let targetUrl = res.data.data;
-    await page.goto(targetUrl, { waitUntil: "domcontentloaded" });
-    await sleep(2000);
-    //获取targetUrl的cookie
-    const targetCookiesArr = await context.cookies();
-    const targetCookies = formatCookie(targetCookiesArr);
-    await browser.close();
-    return targetCookies;
-  } catch (error) {
-    console.log(error);
-  }
+  await browser.close();
+  return cookies;
 }
 
 module.exports = loginAndReturnCookie;

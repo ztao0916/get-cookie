@@ -1,7 +1,7 @@
 /*
  * @Author: ztao
  * @Date: 2023-05-29 19:19:40
- * @LastEditTime: 2023-05-31 12:23:05
+ * @LastEditTime: 2023-06-01 10:11:57
  * @Description:
  */
 const express = require("express");
@@ -11,9 +11,9 @@ const log = require("./utils/log");
 
 // 定义GET接口
 app.get("/", (req, res) => {
-  res.send("scm获取接口服务部署成功");
+  res.send("sprite获取接口服务部署成功");
 });
-app.get("/scm/cookie", async (req, res) => {
+app.get("/sprite/cookie", async (req, res) => {
   let cookie = await loginAndReturnCookie();
   if (cookie) {
     res.send({
@@ -32,6 +32,6 @@ app.get("/scm/cookie", async (req, res) => {
   }
 });
 
-app.listen(12000, () => {
-  log.info("服务运行在12000端口");
+app.listen(13000, () => {
+  log.info("服务运行在13000端口");
 });
